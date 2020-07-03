@@ -1,6 +1,12 @@
+// returns an istance of restaurant
+var createRestaurant = (name) => new restaurant(name)
+
+// assigns to restaurant the result of self-invoking functionality
+// whose purpose is to create the persistent lexically scoped reference data
+// around constructor function that is returned
 var restaurant = (() => {
   var _globals = {
-    _cityTaxes : 0
+    _cityTaxes: 0
   }
 
   function construct(name) {
@@ -9,26 +15,26 @@ var restaurant = (() => {
     this._revenue = 0
     this._taxesDue = 0
     Object.defineProperty(this, 'revenue', {
-      get(){
-        return floorToCents(this._revenue)
+      get() {
+        return (this._revenue)
       },
-      set(x){
+      set(x) {
         this.taxesDue += calculateTaxes(x - this._revenue)
         this._revenue = x
       }
     })
     Object.defineProperty(this, 'taxesDue', {
-      get(){
-        return floorToCents(this._taxesDue)
+      get() {
+        return (this._taxesDue)
       },
-      set(x){
+      set(x) {
         this.cityTaxes += x - this._taxesDue
         this._taxesDue = x
       }
     })
     Object.defineProperty(this, 'cityTaxes', {
       get() {
-        return floorToCents(_globals._cityTaxes)
+        return (_globals._cityTaxes)
       },
       set(x) {
         _globals._cityTaxes = x
@@ -36,7 +42,7 @@ var restaurant = (() => {
     })
     Object.defineProperty(this, 'profit', {
       get() {
-        return floorToCents(this.revenue - this.foodCost - this.taxesDue)
+        return (this.revenue - this.foodCost - this.taxesDue)
       }
     })
     this.menus = {
@@ -49,8 +55,7 @@ var restaurant = (() => {
   return construct
 })()
 
-var createRestaurant = (name) => new restaurant(name)
-
+// if an item isn't in a restaurant's list of reference data, then add it to the appropriate menu
 function addMenuItem(rest, item) {
   if (rest.itemRefs[item.name] == undefined) {
     rest.itemRefs[item.name] = item.type
@@ -58,39 +63,48 @@ function addMenuItem(rest, item) {
   }
 }
 
+// if an item is in a restaurant's list of reference data, remove it. Either way, return the appropriate string
 function removeMenuItem(rest, itemName) {
   return (rest.itemRefs[itemName] == undefined) ? `Sorry, we don't sell ${itemName}, try adding a new recipe!` : _removeMenuItem(rest, itemName)
 }
 
+// does the actualy removal of the item and unsets the item in reference data
 function _removeMenuItem(rest, itemName) {
   var arr = rest.menus[rest.itemRefs[itemName]]
   for (var i = 0, run = arr.length; i < run; i++) {
     (arr[i].name == itemName) ? arr.shift(): arr.push(arr.shift())
   }
-  return `No one is eating our ${itemName} - it has been removed from the ${rest.itemRefs[itemName]} menu!`
+  const menuName = rest.itemRefs[itemName]
+  rest.itemRefs[itemName] = undefined
+  return `No one is eating our ${itemName} - it has been removed from the ${menuName} menu!`
 }
 
+// Chooses an item to order randomly from a random menu in the restaurant
 function orderMenuItem(rest) {
-  const menuKeys = Object.keys(rest.menus)
-  var menu = Math.floor((menuKeys.length) * Math.random())
-  menu = menuKeys[menu]
-  var item = Math.floor((rest.menus[menu].length) * Math.random())
-  item = rest.menus[menu][item]
+  // creates an array of keys for the restaurant's nonEmpty menus
+  const menuKeys = Object.keys(rest.menus).reduce((allPrev, cur) => {
+    return (rest.menus[cur].length > 0) ? allPrev.concat(cur) : allPrev
+  }, [])
+  const menu = menuKeys[Math.floor((menuKeys.length) * Math.random())]
+  const item = rest.menus[menu][Math.floor((rest.menus[menu].length) * Math.random())]
   _recordMoney(rest, item)
   return item
 }
 
+// merely logs all money transactions. Assumes foodCost for any item is 5$ and taxes are 10% (though that is tracked in the constructor and the calculateTaxes function)
 function _recordMoney(rest, item) {
   rest.foodCost += 5
   rest.revenue += floorToCents(item.price)
 }
 
-function floorToCents(price){
-   return(Math.floor(Number(price) * 100))/100
+// rounds a number to the next lowest hundreth place
+function floorToCents(price) {
+  return (Math.floor(Number(price) * 100)) / 100
 }
 
-function calculateTaxes(price){
-  return (Number(price)/10)
+// calculates the taxes of an item of price. Assumes Tax rate of 10%
+function calculateTaxes(price) {
+  return (Number(price) / 10)
 }
 
 module.exports = {
