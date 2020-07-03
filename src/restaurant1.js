@@ -1,9 +1,9 @@
-// returns an istance of restaurant
+// returns an instance of restaurant
 var createRestaurant = (name) => new restaurant(name)
 
-// assigns to restaurant the result of self-invoking functionality
-// whose purpose is to create the persistent lexically scoped reference data
-// around constructor function that is returned
+// assigns to `restaurant` the result of a self-invoking function.
+// This creates persistent lexically scoped reference data
+// around a constructor function that is returned
 var restaurant = (() => {
   var _globals = {
     _cityTaxes: 0
@@ -63,12 +63,12 @@ function addMenuItem(rest, item) {
   }
 }
 
-// if an item is in a restaurant's list of reference data, remove it. Either way, return the appropriate string
+// if an item is in a restaurant's list of reference data, remove it. Either way, return an appropriate string
 function removeMenuItem(rest, itemName) {
   return (rest.itemRefs[itemName] == undefined) ? `Sorry, we don't sell ${itemName}, try adding a new recipe!` : _removeMenuItem(rest, itemName)
 }
 
-// does the actualy removal of the item and unsets the item in reference data
+// does the actual removal of the item and unsets the item in reference data
 function _removeMenuItem(rest, itemName) {
   var arr = rest.menus[rest.itemRefs[itemName]]
   for (var i = 0, run = arr.length; i < run; i++) {
