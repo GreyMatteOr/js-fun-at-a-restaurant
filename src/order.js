@@ -15,9 +15,9 @@ function listItems(arr) {
 }
 
 function searchOrder(arr, item) {
-  return arr.map((cur) => {
-    return cur.item === item
-  }).includes(true)
+  return arr.reduce((isInPrev ,cur) => {
+    return (cur.item === item) || isInPrev
+  })
 }
 
 module.exports = {
