@@ -19,7 +19,7 @@ var restaurant = (() => {
         return (this._revenue)
       },
       set(x) {
-        this.taxesDue += calculateTaxes(x - this._revenue)
+        this.taxesDue += calculateTaxesDue(x - this._revenue)
         this._revenue = x
       }
     })
@@ -91,7 +91,7 @@ function orderMenuItem(rest) {
   return item
 }
 
-// merely logs all money transactions. Assumes foodCost for any item is 5$ and taxes are 10% (though that is tracked in the constructor and the calculateTaxes function)
+// merely logs all money transactions. Assumes foodCost for any item is 5$ and taxes are 10% (though that is tracked in the constructor and the calculateTaxesDue function)
 function _recordMoney(rest, item) {
   rest.foodCost += 5
   rest.revenue += floorToCents(item.price)
@@ -103,8 +103,13 @@ function floorToCents(price) {
 }
 
 // calculates the taxes of an item of price. Assumes Tax rate of 10%
-function calculateTaxes(price) {
+function calculateTaxesDue(price) {
   return (Number(price) / 10)
+}
+
+// return what percentage of city taxes originally came from the restaurant
+function calculateTaxContibution(rest){
+  return rest.taxesDue / rest.cityTaxes
 }
 
 module.exports = {
@@ -113,5 +118,6 @@ module.exports = {
   removeMenuItem,
   orderMenuItem,
   floorToCents,
-  calculateTaxes
+  calculateTaxesDue,
+  calculateTaxContibution,
 }

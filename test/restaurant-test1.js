@@ -7,7 +7,8 @@ var {
   removeMenuItem,
   orderMenuItem,
   floorToCents,
-  calculateTaxes
+  calculateTaxesDue,
+  calculateTaxContibution,
 } = require("../src/restaurant1");
 
 describe("restaurant.js", function() {
@@ -251,7 +252,7 @@ describe("restaurant.js", function() {
       const order = orderMenuItem(pizzaRestaurant)
       assert.equal(pizzaRestaurant.foodCost, 5)
       assert.equal(pizzaRestaurant.revenue, floorToCents(order.price))
-      assert.closeTo(pizzaRestaurant.taxesDue, calculateTaxes(order.price), .01)
+      assert.closeTo(pizzaRestaurant.taxesDue, calculateTaxesDue(order.price), .01)
     })
     it('it should record these things for many orders', function() {
       var pizzaRestaurant = createRestaurant("Sexy Pizza");
@@ -281,7 +282,7 @@ describe("restaurant.js", function() {
       const order2 = orderMenuItem(pizzaRestaurant)
       assert.equal(pizzaRestaurant.foodCost, 10)
       assert.equal(pizzaRestaurant.revenue, floorToCents(order1.price) + floorToCents(order2.price))
-      assert.closeTo(pizzaRestaurant.taxesDue, (floorToCents(calculateTaxes(order1.price) + calculateTaxes(order2.price))), .011)
+      assert.closeTo(pizzaRestaurant.taxesDue, (floorToCents(calculateTaxesDue(order1.price) + calculateTaxesDue(order2.price))), .011)
     })
     it('should be possible to find the restaurants total profit', function() {
       var pizzaRestaurant = createRestaurant("Sexy Pizza");
@@ -308,11 +309,11 @@ describe("restaurant.js", function() {
       addMenuItem(pizzaRestaurant, veggiePizza);
 
       const order1 = orderMenuItem(pizzaRestaurant)
-      const financials1 = order1.price - 5 - calculateTaxes(order1.price)
+      const financials1 = order1.price - 5 - calculateTaxesDue(order1.price)
       assert.closeTo(pizzaRestaurant.profit, floorToCents(financials1), .02)
 
       const order2 = orderMenuItem(pizzaRestaurant)
-      const financials2 = order2.price - 5 - calculateTaxes(order2.price)
+      const financials2 = order2.price - 5 - calculateTaxesDue(order2.price)
       assert.closeTo(pizzaRestaurant.profit, floorToCents(financials1 + financials2), .021)
     })
     it('should track the total taxesDue to the government', function() {
@@ -361,6 +362,7 @@ describe("restaurant.js", function() {
       addMenuItem(tacoRestaurant, bbqTaco);
       addMenuItem(tacoRestaurant, baconEggsTaco);
       addMenuItem(tacoRestaurant, veggieTaco);
+
       pizzaRestaurant.cityTaxes = 0
       const order1 = orderMenuItem(tacoRestaurant)
       const order2 = orderMenuItem(tacoRestaurant)
@@ -371,8 +373,67 @@ describe("restaurant.js", function() {
 
       assert.closeTo(pizzaRestaurant.cityTaxes, floorToCents(tacoRestaurant.taxesDue + pizzaRestaurant.taxesDue), .021)
 
-      const cumulativeOrdersTax = calculateTaxes(order1.price) + calculateTaxes(order2.price) + calculateTaxes(order3.price) + calculateTaxes(order4.price)
+      const cumulativeOrdersTax = calculateTaxesDue(order1.price) + calculateTaxesDue(order2.price) + calculateTaxesDue(order3.price) + calculateTaxesDue(order4.price)
       assert.closeTo(pizzaRestaurant.cityTaxes, floorToCents(cumulativeOrdersTax), .051)
+    })
+  })
+  describe('calculateTaxContribution', function() {
+    it('should return the percentage of city taxes a restaurant owes', function() {
+      var pizzaRestaurant = createRestaurant("Sexy Pizza");
+      var bbqPizza = {
+        name: "BBQ Chicken Pizza",
+        price: "12.49",
+        type: "lunch"
+      };
+
+      var veggiePizza = {
+        name: "Veggie Pizza",
+        price: "11.49",
+        type: "dinner"
+      };
+
+      var baconEggsPizza = {
+        name: "Bacon and Eggs Pizza",
+        price: "13.49",
+        type: "breakfast"
+      };
+
+      addMenuItem(pizzaRestaurant, bbqPizza);
+      addMenuItem(pizzaRestaurant, baconEggsPizza);
+      addMenuItem(pizzaRestaurant, veggiePizza);
+
+      var tacoRestaurant = createRestaurant("Sexy Taco");
+      var bbqTaco = {
+        name: "BBQ Chicken Taco",
+        price: "12.49",
+        type: "lunch"
+      };
+
+      var veggieTaco = {
+        name: "Veggie Taco",
+        price: "11.49",
+        type: "dinner"
+      };
+
+      var baconEggsTaco = {
+        name: "Bacon and Eggs Taco",
+        price: "13.49",
+        type: "breakfast"
+      };
+
+      addMenuItem(tacoRestaurant, bbqTaco);
+      addMenuItem(tacoRestaurant, baconEggsTaco);
+      addMenuItem(tacoRestaurant, veggieTaco);
+
+      pizzaRestaurant.cityTaxes = 0
+      const order1 = orderMenuItem(tacoRestaurant)
+      const order2 = orderMenuItem(pizzaRestaurant)
+      const order3 = orderMenuItem(pizzaRestaurant)
+      const order4 = orderMenuItem(pizzaRestaurant)
+
+      assert.closeTo(calculateTaxContibution(tacoRestaurant), calculateTaxesDue(order1.price) / tacoRestaurant.cityTaxes, .1)
+      assert.closeTo(calculateTaxContibution(tacoRestaurant), calculateTaxesDue(order1.price) / pizzaRestaurant.cityTaxes, .1)
+      assert.closeTo(calculateTaxContibution(pizzaRestaurant), (calculateTaxesDue(order2.price) + calculateTaxesDue(order3.price) + calculateTaxesDue(order4.price)) / pizzaRestaurant.cityTaxes, .1)
 
     })
   })
