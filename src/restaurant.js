@@ -28,7 +28,6 @@ function removeMenuItem(rest, itemName) {
 }
 
   function _removeMenuItem(arr, itemName, idTest) {
-    console.log(`ENTERED ${itemName}`);
     for (var i = 0, run = arr.length; i < run; i++) {
       (idTest[i]) ? arr.shift(): arr.push(arr.shift)
     }
