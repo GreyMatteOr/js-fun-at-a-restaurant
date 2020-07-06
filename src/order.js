@@ -9,9 +9,8 @@ function refundOrder(pos, arr) {
 }
 
 function listItems(arr) {
-  return arr.reduce((sum, cur) => {
-    return `${sum}, ${cur.item}`
-  }, ``).slice(2)
+  return arr.map((item) => item.item )
+            .reduce((sum, cur) => `${sum}, ${cur}` )
 }
 
 function searchOrder(arr, item) {
